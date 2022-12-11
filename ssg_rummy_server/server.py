@@ -23,8 +23,8 @@ def game():
 
 open_sockets = defaultdict(list)
 
-@sock.route("/echo")
-def echo(ws):
+@sock.route("/update_game_state")
+def update_game_state(ws):
     print("Websocket opened", ws, flush=True)
     added_to_queue = False
     while True:

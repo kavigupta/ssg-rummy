@@ -17,7 +17,7 @@ function send_command(socket, command) {
     socket.send(JSON.stringify(update_command));
 }
 
-const socket = new WebSocket('ws://' + location.host + '/echo');
+const socket = new WebSocket('ws://' + location.host + '/update_game_state');
 socket.addEventListener('message', update_view);
 document.getElementById('form').onsubmit = ev => {
     ev.preventDefault();

@@ -31,11 +31,19 @@ function send_command(socket, command) {
 
 const socket = new WebSocket('ws://' + location.host + '/update_game_state');
 socket.addEventListener('message', update_view);
-document.getElementById('form').onsubmit = ev => {
+document.getElementById('throw').onsubmit = ev => {
     ev.preventDefault();
-    const textField = document.getElementById('text');
-    send_command(socket, textField.value);
+    const textField = document.getElementById('to-throw');
+    send_command(socket, { "type": "throw", "to-throw": textField.value });
     textField.value = '';
+};
+
+document.getElementById('draw-shown').onclick = ev => {
+    send_command(socket, { "type": "draw-shown" });
+};
+
+document.getElementById('draw-hidden').onclick = ev => {
+    send_command(socket, { "type": "draw-hidden" });
 };
 
 socket.onopen = () => send_command(socket, { "type": "view" });

@@ -4,8 +4,19 @@ const log = (text, color) => {
     document.getElementById('log').innerHTML += `<span style="color: ${color}">${text}</span><br>`;
 };
 
+function updateHand(cards) {
+    var x = "";
+    for (var i = 0; i < cards.length; i++) {
+        x += (i + 1) + ". " + JSON.stringify(cards[i]);
+        x += "<br>";
+    }
+    document.getElementById('hand').innerHTML = x;
+}
+
 function update_view(ev) {
-    log('<<< ' + ev.data, 'blue');
+    const data = JSON.parse(ev.data);
+    log('<<< ' + JSON.stringify(data["state"]), 'blue');
+    updateHand(data["hand"]);
 }
 
 function send_command(socket, command) {

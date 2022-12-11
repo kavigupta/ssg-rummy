@@ -1,7 +1,8 @@
 from collections import defaultdict
 import json
+import uuid
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 from flask_sock import Sock, ConnectionClosed
 from permacache.locked_shelf import LockedShelf
 
@@ -10,18 +11,34 @@ from .game_state import GameState
 app = Flask(__name__)
 sock = Sock(app)
 
+
 def database():
     return LockedShelf("data/shelf", multiprocess_safe=True)
 
 
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
 @app.route("/game")
 def game():
-    import os
-
-    print(os.getcwd(), flush=True)
     return render_template("game.html")
 
+
+@app.route("/create_game", methods=["POST"])
+def create_game():
+    names = request.form["names"].split(",")
+    game_id = str(uuid.uuid4())
+    with database() as db:
+        db[game_id] = GameState.create(names)
+    # TODO escape things properly
+    # TODO intermediate landing page
+    return redirect(f"/game?user={names[0]}&game_id={game_id}", code=302)
+
+
 open_sockets = defaultdict(list)
+
 
 @sock.route("/update_game_state")
 def update_game_state(ws):
@@ -31,8 +48,9 @@ def update_game_state(ws):
         data = json.loads(ws.receive())
         print("received data", data, "on websocket", ws)
         game_id = data["game_id"]
+        # TODO handle game doesn't exist error
         user = data["user"]
-        
+
         if not added_to_queue:
             open_sockets[game_id].append(ws)
             added_to_queue = True
@@ -40,10 +58,7 @@ def update_game_state(ws):
 
         command = data["command"]
         with database() as db:
-            if game_id not in db:
-                game_state = GameState.create()
-            else:
-                game_state = db[game_id]
+            game_state = db[game_id]
             user_visible_state = game_state.act(user, command)
             db[game_id] = game_state
             for to_update in open_sockets[game_id][:]:
@@ -54,5 +69,6 @@ def update_game_state(ws):
                     print("ERROR: Connection closed", flush=True)
                     open_sockets[game_id].remove(to_update)
                     print("Removed")
+
 
 app.debug = True

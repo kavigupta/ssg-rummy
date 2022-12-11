@@ -20,6 +20,7 @@ function update_view(ev) {
 }
 
 function send_command(socket, command) {
+    log('>>> ' + JSON.stringify(command), 'red');
     const update_command = {
         "command": command,
         "game_id": window_info.get("game_id"),
@@ -33,9 +34,8 @@ socket.addEventListener('message', update_view);
 document.getElementById('form').onsubmit = ev => {
     ev.preventDefault();
     const textField = document.getElementById('text');
-    log('>>> ' + textField.value, 'red');
     send_command(socket, textField.value);
     textField.value = '';
 };
 
-socket.onopen = () => send_command(socket, "view");
+socket.onopen = () => send_command(socket, { "type": "view" });

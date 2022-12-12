@@ -40,7 +40,23 @@ class GameState:
 
     def act(self, user, action):
         self.actions += [(user, action)]
-        return self.summary(user)
+        action = action.copy()
+        typ = action.pop("type")
+        methods = {"view": self.view, "update-order": self.update_order}
+        if typ not in methods:
+            print("ERROR: unrecognized", typ, flush=True)
+            return
+        methods[typ](user, **action)
+
+    def view(self, user):
+        pass
+
+    def update_order(self, user, new_order):
+        if sorted(self.hands_per_user[user]) == sorted(tuple(x) for x in new_order):
+            self.hands_per_user[user] = new_order
+        else:
+            # TODO handle error
+            pass
 
     def serialize(self):
         return {a.name: getattr(self, a.name) for a in self.__attrs_attrs__}

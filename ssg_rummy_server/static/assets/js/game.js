@@ -61,7 +61,7 @@ document.getElementById('draw-hidden').onclick = ev => {
 function on_hand_order_updated() {
     const new_cards = [...document.getElementById('hand').children]
         .map(c => last_cards[c.getAttribute("order-in-array")]);
-    send_command(socket, { "type": "update-order", "new-order": new_cards })
+    send_command(socket, { "type": "update-order", "new_order": new_cards })
 }
 
 socket.onopen = () => send_command(socket, { "type": "view" });

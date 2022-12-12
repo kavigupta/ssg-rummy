@@ -25,7 +25,8 @@ function updateHand(cards) {
 
 function update_view(ev) {
     const data = JSON.parse(ev.data);
-    log('<<< ' + JSON.stringify(data["state"]), 'blue');
+    const actions = data["state"]["actions"];
+    log('<<< ' + JSON.stringify(actions[actions.length - 1]), 'blue');
     updateHand(data["hand"]);
 }
 

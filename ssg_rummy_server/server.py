@@ -61,6 +61,8 @@ def update_game_state(ws):
             game_state = db[game_id]
             game_state.act(user, command)
             db[game_id] = game_state
+            print("Game state updated to", flush=True)
+            print(game_state, flush=True)
             for socket_user, to_update in open_sockets[game_id][:]:
                 print("Attempting to update", to_update, flush=True)
                 try:

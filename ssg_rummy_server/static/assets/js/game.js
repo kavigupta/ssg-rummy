@@ -4,13 +4,23 @@ const log = (text, color) => {
     document.getElementById('log').innerHTML += `<span style="color: ${color}">${text}</span><br>`;
 };
 
+var last_cards = [];
+
 function updateHand(cards) {
+    if (JSON.stringify([...cards].sort()) === JSON.stringify([...last_cards].sort())) {
+        return;
+    }
+    const hand_display = document.getElementById('hand');
+    hand_display.innerHTML = "";
     var x = "";
     for (var i = 0; i < cards.length; i++) {
-        x += (i + 1) + ". " + JSON.stringify(cards[i]);
-        x += "<br>";
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(JSON.stringify(cards[i])));
+        li.setAttribute("order-in-array", i);
+        hand_display.appendChild(li);
     }
-    document.getElementById('hand').innerHTML = x;
+    enableDragSort('drag-sort-enable', on_hand_order_updated);
+    last_cards = cards;
 }
 
 function update_view(ev) {
@@ -45,5 +55,12 @@ document.getElementById('draw-shown').onclick = ev => {
 document.getElementById('draw-hidden').onclick = ev => {
     send_command(socket, { "type": "draw-hidden" });
 };
+
+
+function on_hand_order_updated() {
+    const new_cards = [...document.getElementById('hand').children]
+        .map(c => last_cards[c.getAttribute("order-in-array")]);
+    send_command(socket, { "type": "update-order", "new-order": new_cards })
+}
 
 socket.onopen = () => send_command(socket, { "type": "view" });

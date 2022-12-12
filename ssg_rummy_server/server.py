@@ -52,22 +52,22 @@ def update_game_state(ws):
         user = data["user"]
 
         if not added_to_queue:
-            open_sockets[game_id].append(ws)
+            open_sockets[game_id].append((user, ws))
             added_to_queue = True
             print("Added", ws, " to open sockets queue, with game id", game_id)
 
         command = data["command"]
         with database() as db:
             game_state = db[game_id]
-            user_visible_state = game_state.act(user, command)
+            game_state.act(user, command)
             db[game_id] = game_state
-            for to_update in open_sockets[game_id][:]:
+            for socket_user, to_update in open_sockets[game_id][:]:
                 print("Attempting to update", to_update, flush=True)
                 try:
-                    to_update.send(user_visible_state)
+                    to_update.send(game_state.summary(socket_user))
                 except ConnectionClosed:
                     print("ERROR: Connection closed", flush=True)
-                    open_sockets[game_id].remove(to_update)
+                    open_sockets[game_id].remove((socket_user, to_update))
                     print("Removed")
 
 

@@ -28,6 +28,20 @@ function update_view(ev) {
     const actions = data["state"]["actions"];
     log('<<< ' + JSON.stringify(actions[actions.length - 1]), 'blue');
     updateHand(data["hand"]);
+    document.getElementById('whose-turn').innerHTML = JSON.stringify(data["next_valid_action"]);
+    document.getElementById('joker').innerHTML = JSON.stringify(data["joker"]);
+    document.getElementById('discarded').innerHTML = JSON.stringify(data["discarded"]);
+    for (const button of document.getElementsByClassName("only-on-turn-throw")) {
+        console.log(data["next_valid_action"]);
+        button.disabled = JSON.stringify(data["next_valid_action"]) !== JSON.stringify([get_user(), "throw"]);
+    }
+    for (const button of document.getElementsByClassName("only-on-turn-draw")) {
+        button.disabled = JSON.stringify(data["next_valid_action"]) !== JSON.stringify([get_user(), "draw"]);
+    }
+}
+
+function get_user() {
+    return window_info.get("user");
 }
 
 function send_command(socket, command) {
@@ -35,15 +49,14 @@ function send_command(socket, command) {
     const update_command = {
         "command": command,
         "game_id": window_info.get("game_id"),
-        "user": window_info.get("user")
+        "user": get_user()
     };
     socket.send(JSON.stringify(update_command));
 }
 
 const socket = new WebSocket('ws://' + location.host + '/update_game_state');
 socket.addEventListener('message', update_view);
-document.getElementById('throw').onsubmit = ev => {
-    ev.preventDefault();
+document.getElementById('throw').onclick = ev => {
     const textField = document.getElementById('to-throw');
     send_command(socket, { "type": "throw", "to-throw": textField.value });
     textField.value = '';

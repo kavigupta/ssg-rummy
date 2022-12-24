@@ -2,26 +2,28 @@
 <html>
 
 <head>
-    <title>Flask-Sock Demo</title>
+    <title>SSG Rummy</title>
 </head>
 
 <body>
-    <h1>Flask-Sock Demo</h1>
-    <div id="log"></div>
+    <h1>SSG Rummy</h1>
     <br>
-    <button type="button" id="draw-shown">Draw Shown</button>
-    <button type="button" id="draw-hidden">Draw Hidden</button>
+    Whose turn: <span id="whose-turn"></span>
     <br>
-    <form id="throw">
-        <label for="to-throw">Throw: </label>
-        <input type="to-throw" id="to-throw" autofocus>
-    </form>
-    <script src="static/assets/js/game.js"></script>
-
+    Joker: <span id="joker"></span>, Discard pile: <span id="discarded"></span>
+    <br>
     <ol class="drag-sort-enable" id="hand" start="0"></ol>
+    <br>
+    <button type="button" id="draw-shown" class="only-on-turn-draw">Draw Shown</button>
+    <button type="button" id="draw-hidden" class="only-on-turn-draw">Draw Hidden</button>
+    <br>
+    <input type="to-throw" id="to-throw" autofocus>
+    <button type="button" id="throw" class="only-on-turn-throw">Throw</button>
+    <script src="static/assets/js/game.js"></script>
 
     <script src="static/assets/js/reorderable-list.js"></script>
 
+    <div id="log"></div>
 </body>
 
 </html>

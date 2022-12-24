@@ -34,7 +34,7 @@ class GameState:
             hands_per_user=hands,
             draw_pile=cards,
             discard_pile=discard_pile,
-            next_valid_action=[(names[0], "draw")],
+            next_valid_action=(names[0], "draw"),
             actions=[],
         )
 
@@ -62,4 +62,12 @@ class GameState:
         return {a.name: getattr(self, a.name) for a in self.__attrs_attrs__}
 
     def summary(self, user):
-        return json.dumps(dict(hand=self.hands_per_user[user], state=self.serialize()))
+        return json.dumps(
+            dict(
+                next_valid_action=self.next_valid_action,
+                joker=self.joker,
+                discarded=self.discard_pile[0],
+                hand=self.hands_per_user[user],
+                state=self.serialize(),
+            )
+        )

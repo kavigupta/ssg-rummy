@@ -1,0 +1,9 @@
+# for project
+
+flask==2.2.2
+flask-sock==0.5.2
+permacache==3.6.2
+attrs==22.2.0
+
+# meta
+black==22.12.0

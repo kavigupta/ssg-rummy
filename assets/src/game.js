@@ -1,3 +1,5 @@
+import { enableDragSort } from './reorderable-list.js';
+
 const window_info = new URLSearchParams(window.location.search);
 
 const log = (text, color) => {

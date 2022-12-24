@@ -6,7 +6,9 @@ Modified to include a hook.
 
 */
 
-handles = {}
+export { enableDragSort};
+
+var handles = {};
 
 function enableDragSort(listClass, onDragEnd) {
     const sortableLists = document.getElementsByClassName(listClass);

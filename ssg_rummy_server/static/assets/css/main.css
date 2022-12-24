@@ -1,0 +1,19 @@
+ol.nav {
+    padding-left: 0px;
+    background-color: #ccc;
+    text-align: center;
+}
+
+ol.nav>li {
+    display: inline-block;
+    padding: 5px 5px;
+}
+
+ol.nav>li:hover {
+    background-color: #2779BF;
+}
+
+ol.nav>li>a {
+    color: white;
+    text-decoration: none;
+}

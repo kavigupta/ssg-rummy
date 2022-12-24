@@ -42,7 +42,13 @@ class GameState:
         self.actions += [(user, action)]
         action = action.copy()
         typ = action.pop("type")
-        methods = {"view": self.view, "update-order": self.update_order}
+        methods = {
+            "view": self.view,
+            "update_order": self.update_order,
+            "draw-shown": self.draw_shown,
+            "draw-hidden": self.draw_hidden,
+            "throw": self.throw,
+        }
         if typ not in methods:
             print("ERROR: unrecognized", typ, flush=True)
             return
@@ -58,6 +64,37 @@ class GameState:
             # TODO handle error
             pass
 
+    def draw_shown(self, user):
+        if self.next_valid_action != (user, "draw"):
+            # TODO handle error
+            return
+        # there should always be at least one card in the draw pile
+        self.hands_per_user[user] += [self.discard_pile.pop()]
+        self.next_valid_action = (user, "throw")
+        self.actions += [(user, {"type": "draw-shown"})]
+
+    def draw_hidden(self, user):
+        if self.next_valid_action != (user, "draw"):
+            # TODO handle error
+            return
+        # TODO handle case where draw pile is empty, should reshuffle discard pile
+        self.hands_per_user[user] += [self.draw_pile.pop()]
+        self.next_valid_action = (user, "throw")
+        self.actions += [(user, {"type": "draw-hidden"})]
+
+    def throw(self, user, card, index):
+        if self.next_valid_action != (user, "throw"):
+            # TODO handle error
+            return
+        if tuple(self.hands_per_user[user][index]) != tuple(card):
+            # TODO handle error
+            return
+
+        self.hands_per_user[user].pop(index)
+        self.discard_pile += [card]
+        self.next_valid_action = (self.next_user(user), "draw")
+        self.actions += [(user, {"type": "throw", "card": card, "index": index})]
+
     def serialize(self):
         return {a.name: getattr(self, a.name) for a in self.__attrs_attrs__}
 
@@ -66,8 +103,11 @@ class GameState:
             dict(
                 next_valid_action=self.next_valid_action,
                 joker=self.joker,
-                discarded=self.discard_pile[0],
+                discarded=self.discard_pile[-1] if self.discard_pile else None,
                 hand=self.hands_per_user[user],
                 state=self.serialize(),
             )
         )
+
+    def next_user(self, user):
+        return self.names[(self.names.index(user) + 1) % len(self.names)]

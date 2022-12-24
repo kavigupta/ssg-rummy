@@ -38,6 +38,7 @@ function update_view(ev) {
     for (const button of document.getElementsByClassName("only-on-turn-draw")) {
         button.disabled = JSON.stringify(data["next_valid_action"]) !== JSON.stringify([get_user(), "draw"]);
     }
+    // TODO handle case where the discarded card is a joker
 }
 
 function get_user() {
@@ -58,7 +59,8 @@ const socket = new WebSocket('ws://' + location.host + '/update_game_state');
 socket.addEventListener('message', update_view);
 document.getElementById('throw').onclick = ev => {
     const textField = document.getElementById('to-throw');
-    send_command(socket, { "type": "throw", "to-throw": textField.value });
+    idx = parseInt(textField.value);
+    send_command(socket, { "type": "throw", "index": idx, "card": last_cards[idx] });
     textField.value = '';
 };
 

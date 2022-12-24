@@ -15,7 +15,7 @@ function updateHand(cards) {
     var x = "";
     for (var i = 0; i < cards.length; i++) {
         var li = document.createElement("li");
-        li.appendChild(document.createTextNode(JSON.stringify(cards[i])));
+        li.appendChild(render_card(cards[i]));
         li.setAttribute("order-in-array", i);
         hand_display.appendChild(li);
     }
@@ -29,8 +29,10 @@ function update_view(ev) {
     log('<<< ' + JSON.stringify(actions[actions.length - 1]), 'blue');
     updateHand(data["hand"]);
     document.getElementById('whose-turn').innerHTML = JSON.stringify(data["next_valid_action"]);
-    document.getElementById('joker').innerHTML = JSON.stringify(data["joker"]);
-    document.getElementById('discarded').innerHTML = JSON.stringify(data["discarded"]);
+    document.getElementById('joker').innerHTML = "";
+    document.getElementById('joker').appendChild(render_card(data["joker"]));
+    document.getElementById('discarded').innerHTML = "";
+    document.getElementById('discarded').appendChild(render_card(data["discarded"]));
     for (const button of document.getElementsByClassName("only-on-turn-throw")) {
         console.log(data["next_valid_action"]);
         button.disabled = JSON.stringify(data["next_valid_action"]) !== JSON.stringify([get_user(), "throw"]);
@@ -77,6 +79,22 @@ function on_hand_order_updated() {
     const new_cards = [...document.getElementById('hand').children]
         .map(c => last_cards[c.getAttribute("order-in-array")]);
     send_command(socket, { "type": "update-order", "new_order": new_cards })
+}
+
+function render_card(card) {
+    if (card === null) {
+        return document.createTextNode("None");
+    }
+    const number = card[0];
+    var to_suit = {
+        H: "♠",
+        D: "♦",
+        C: "♣",
+        S: "♥"
+    };
+    const suit = to_suit[card[1]];
+    card = `${suit}${number}`;
+    return document.createTextNode(card);
 }
 
 socket.onopen = () => send_command(socket, { "type": "view" });

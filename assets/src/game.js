@@ -1,56 +1,22 @@
-import { enableDragSort } from './reorderable-list.js';
+import { useState } from 'react';
+import React from 'react';
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+import ReactDOM from 'react-dom/client';
+
+import { CardList } from './cards/card_list';
+
+const client = new W3CWebSocket('ws://' + location.host + '/update_game_state');
 
 const window_info = new URLSearchParams(window.location.search);
-
-const log = (text, color) => {
-    document.getElementById('log').innerHTML += `<span style="color: ${color}">${text}</span><br>`;
-};
-
-var last_cards = [];
-
-function updateHand(cards) {
-    if (JSON.stringify([...cards].sort()) === JSON.stringify([...last_cards].sort())) {
-        return;
-    }
-    const hand_display = document.getElementById('hand');
-    hand_display.innerHTML = "";
-    var x = "";
-    for (var i = 0; i < cards.length; i++) {
-        var li = document.createElement("li");
-        li.appendChild(render_card(cards[i]));
-        li.setAttribute("order-in-array", i);
-        hand_display.appendChild(li);
-    }
-    enableDragSort('drag-sort-enable', on_hand_order_updated);
-    last_cards = cards;
-}
-
-function update_view(ev) {
-    const data = JSON.parse(ev.data);
-    const actions = data["state"]["actions"];
-    log('<<< ' + JSON.stringify(actions[actions.length - 1]), 'blue');
-    updateHand(data["hand"]);
-    document.getElementById('whose-turn').innerHTML = JSON.stringify(data["next_valid_action"]);
-    document.getElementById('joker').innerHTML = "";
-    document.getElementById('joker').appendChild(render_card(data["joker"]));
-    document.getElementById('discarded').innerHTML = "";
-    document.getElementById('discarded').appendChild(render_card(data["discarded"]));
-    for (const button of document.getElementsByClassName("only-on-turn-throw")) {
-        console.log(data["next_valid_action"]);
-        button.disabled = JSON.stringify(data["next_valid_action"]) !== JSON.stringify([get_user(), "throw"]);
-    }
-    for (const button of document.getElementsByClassName("only-on-turn-draw")) {
-        button.disabled = JSON.stringify(data["next_valid_action"]) !== JSON.stringify([get_user(), "draw"]);
-    }
-    // TODO handle case where the discarded card is a joker
-}
 
 function get_user() {
     return window_info.get("user");
 }
 
+
 function send_command(socket, command) {
-    log('>>> ' + JSON.stringify(command), 'red');
+    // log('>>> ' + JSON.stringify(command), 'red');
     const update_command = {
         "command": command,
         "game_id": window_info.get("game_id"),
@@ -59,44 +25,125 @@ function send_command(socket, command) {
     socket.send(JSON.stringify(update_command));
 }
 
-const socket = new WebSocket('ws://' + location.host + '/update_game_state');
-socket.addEventListener('message', update_view);
-document.getElementById('throw').onclick = ev => {
-    const textField = document.getElementById('to-throw');
-    idx = parseInt(textField.value);
-    send_command(socket, { "type": "throw", "index": idx, "card": last_cards[idx] });
-    textField.value = '';
-};
 
-document.getElementById('draw-shown').onclick = ev => {
-    send_command(socket, { "type": "draw-shown" });
-};
-
-document.getElementById('draw-hidden').onclick = ev => {
-    send_command(socket, { "type": "draw-hidden" });
-};
-
-
-function on_hand_order_updated() {
-    const new_cards = [...document.getElementById('hand').children]
-        .map(c => last_cards[c.getAttribute("order-in-array")]);
-    send_command(socket, { "type": "update-order", "new_order": new_cards })
+function WhoseTurn(props) {
+    return (
+        <span className="whose-turn">
+            {JSON.stringify(props.next_valid_action)}
+        </span>
+    );
 }
 
-function render_card(card) {
-    if (card === null) {
-        return document.createTextNode("None");
-    }
-    const number = card[0];
-    var to_suit = {
-        H: "♠",
-        D: "♦",
-        C: "♣",
-        S: "♥"
+function Joker(props) {
+    return (
+        <span className="joker">
+            {JSON.stringify(props.joker)}
+        </span>
+    );
+}
+
+function Discarded(props) {
+    return (
+        <span className="discarded">
+            {JSON.stringify(props.discarded)}
+        </span>
+    );
+}
+
+function DrawButtons(props) {
+    return (
+        <div className="draw-buttons">
+            <button onClick={() => send_command(client, { "type": "draw-shown" })} disabled={!props.is_draw}>Draw Shown</button>
+            <button onClick={() => send_command(client, { "type": "draw-hidden" })} disabled={!props.is_draw}>Draw Hidden</button>
+        </div>
+    );
+}
+
+function Throw(props) {
+    const [message, setMessage] = useState('');
+
+    const handleChange = event => {
+        setMessage(event.target.value);
+
+        console.log('value is:', event.target.value);
     };
-    const suit = to_suit[card[1]];
-    card = `${suit}${number}`;
-    return document.createTextNode(card);
+
+    function onThrow() {
+        const idx = parseInt(message);
+        send_command(client, { "type": "throw", "index": idx, "card": props.hand[idx] });
+    }
+
+    return (
+        <div className="throw">
+            <input type="text" id="throw-input" onChange={handleChange} />
+            <button onClick={() => onThrow()} disabled={!props.is_throw}>Throw</button>
+        </div>
+    );
 }
 
-socket.onopen = () => send_command(socket, { "type": "view" });
+
+class MainPanel extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            next_valid_action: null,
+            joker: null,
+            discarded: null,
+            hand: [],
+            state: null,
+        };
+
+    }
+
+    componentWillMount() {
+        client.onopen = () => {
+            send_command(client, { "type": "view" });
+            console.log('WebSocket Client Connected');
+        };
+        client.onmessage = (message) => {
+            this.setState(JSON.parse(message.data));
+        };
+    }
+
+
+    render() {
+        return (
+            <div className="main-panel">
+                Whose turn: <WhoseTurn next_valid_action={this.state.next_valid_action} />
+                <br />
+                Joker: <Joker joker={this.state.joker} />, Discard pile: <Discarded discarded={this.state.discarded} />
+                <br />
+                <CardList state={this.state.hand} setItems={fn => this.updateHand(fn)} />
+                <br />
+                <DrawButtons is_draw={this.is_turn("draw")} />
+                <Throw is_throw={this.is_turn("throw")} hand={this.state.hand} />
+            </div>
+        );
+    }
+
+    updateHand(fn) {
+        const new_state = fn(this.state.hand);
+        this.setState({ hand: new_state });
+        send_command(client, { "type": "update-order", "new_order": new_state })
+    }
+
+    is_turn(action) {
+        return this.state.next_valid_action
+            && this.state.next_valid_action[0] == get_user()
+            && this.state.next_valid_action[1] === action;
+    }
+}
+
+// ========================================
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<MainPanel />);
+
+// const socket = new WebSocket();
+// socket.addEventListener('message', function (event) {
+//     root.setState({ display_state: event.data });
+// });
+
+
+
+// socket.onopen = () => send_command(socket, { "type": "view" });

@@ -44,7 +44,7 @@ class GameState:
         typ = action.pop("type")
         methods = {
             "view": self.view,
-            "update_order": self.update_order,
+            "update-order": self.update_order,
             "draw-shown": self.draw_shown,
             "draw-hidden": self.draw_hidden,
             "throw": self.throw,
@@ -58,9 +58,14 @@ class GameState:
         pass
 
     def update_order(self, user, new_order):
-        if sorted(self.hands_per_user[user]) == sorted(tuple(x) for x in new_order):
+        if sorted(tuple(x) for x in self.hands_per_user[user]) == sorted(
+            tuple(x) for x in new_order
+        ):
             self.hands_per_user[user] = new_order
         else:
+            print("ERROR: invalid order", flush=True)
+            print(sorted(self.hands_per_user[user]))
+            print(sorted(tuple(x) for x in new_order))
             # TODO handle error
             pass
 

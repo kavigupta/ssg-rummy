@@ -18,17 +18,19 @@ import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import SortableCard from "./sortable_card";
 import Card from "./card";
 
+import "./card_list.css";
+
 
 const DroppableCard = ({ id, items }) => {
     const { setNodeRef } = useDroppable({ id });
 
     return (
         <SortableContext id={id} items={items} strategy={rectSortingStrategy}>
-            <ul className="droppable" ref={setNodeRef}>
+            <ol className="cardlist" ref={setNodeRef}>
                 {items.map((item) => (
                     <SortableCard key={item} id={item} />
                 ))}
-            </ul>
+            </ol>
         </SortableContext>
     );
 };

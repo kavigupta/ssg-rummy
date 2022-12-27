@@ -24,7 +24,8 @@ function render_card(card) {
         H: "♠",
         D: "♦",
         C: "♣",
-        S: "♥"
+        S: "♥",
+        "$": "$",
     };
     const suit = to_suit[card[1]];
     card = `${suit}${number}`;

@@ -5,6 +5,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import ReactDOM from 'react-dom/client';
 
 import { CardList } from './cards/card_list';
+import Card from './cards/card';
 
 const client = new W3CWebSocket('ws://' + location.host + '/update_game_state');
 
@@ -37,7 +38,7 @@ function WhoseTurn(props) {
 function Joker(props) {
     return (
         <span className="joker">
-            {JSON.stringify(props.joker)}
+            <Card dragOverlay={false} id={JSON.stringify(["joker", props.joker])} />
         </span>
     );
 }
@@ -45,7 +46,7 @@ function Joker(props) {
 function Discarded(props) {
     return (
         <span className="discarded">
-            {JSON.stringify(props.discarded)}
+            <Card dragOverlay={false} id={JSON.stringify(["discarded", props.discarded])} />
         </span>
     );
 }

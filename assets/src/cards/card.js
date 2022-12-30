@@ -1,5 +1,6 @@
 import React from "react";
 
+import "./card.css";
 
 const Card = ({ id, dragOverlay }) => {
     const style = {
@@ -9,15 +10,26 @@ const Card = ({ id, dragOverlay }) => {
     const [num, card] = JSON.parse(id);
 
     return (
-        <div id={num} style={style} className="card">
+        <span id={num} style={style} className={["card", card_color(card)].join(' ')}>
             {render_card(card)}
-        </div>
+        </span>
     );
 };
 
+function card_color(card) {
+    if (card === null) {
+        return "None";
+    }
+    const suit = card[1];
+    if (suit === "H" || suit === "D") {
+        return "card_red";
+    }
+    return "card_black";
+}
+
 function render_card(card) {
     if (card === null) {
-        return document.createTextNode("None");
+        return "None";
     }
     const number = card[0];
     var to_suit = {

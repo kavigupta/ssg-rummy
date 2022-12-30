@@ -1,6 +1,6 @@
 import unittest
 
-from ssg_rummy_server.declare import consistent_subbags
+from ssg_rummy_server.bag_utils import consistent_subbags
 
 
 class TestConsistentSubbags(unittest.TestCase):

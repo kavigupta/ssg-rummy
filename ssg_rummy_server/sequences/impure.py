@@ -1,7 +1,7 @@
 from collections import defaultdict
 import itertools
 
-from ..bag_utils import intersect_bags
+from ..bag_utils import consistent_subbags, intersect_bags
 from .utils import card_sequences, card_multi_suite_sequences
 
 
@@ -28,3 +28,14 @@ def extract_impure_sequences(cards):
     impure_sequences = [tuple(x) + ((),) * min(y) for x, y in impure_sequences.items()]
 
     return impure_sequences
+
+
+def consistent_impure_sequences(cards, num_jokers):
+    """
+    Produce sets of consistent impure sequences from a list of cards, using up to `num_jokers` jokers.
+    """
+    potentials = extract_impure_sequences(cards)
+    return [
+        [list(x) for x in seqs]
+        for seqs in consistent_subbags(potentials, cards + [()] * num_jokers)
+    ]

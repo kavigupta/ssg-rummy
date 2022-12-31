@@ -1,5 +1,31 @@
+from collections import defaultdict
+import itertools
 from ..bag_utils import consistent_subbags
 from .utils import number_sequences
+
+
+def consistent_pure_sequences(cards):
+    by_suite = defaultdict(list)
+    for number, suite in cards:
+        by_suite[suite].append((number, suite))
+    return [
+        [x for xs in xss for x in xs]
+        for xss in itertools.product(
+            *[
+                consistent_pure_sequences_single_suite_on_cards(cards)
+                for cards in by_suite.values()
+            ]
+        )
+    ]
+
+
+def consistent_pure_sequences_single_suite_on_cards(cards):
+    numbers, suites = zip(*cards)
+    [suite] = set(suites)
+    return [
+        [[(number, suite) for number in sequence] for sequence in sequences]
+        for sequences in consistent_pure_sequences_single_suite(numbers)
+    ]
 
 
 def consistent_pure_sequences_single_suite(numbers_to_extract):

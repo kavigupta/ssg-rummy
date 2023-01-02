@@ -19,15 +19,19 @@ class GameState:
 
     @classmethod
     def create(cls, names):
-        cards = shuffled_deck(3)
-        hands = {}
-        for name in names:
-            hands[name] = cards[:CARDS_PER_USER]
-            cards = cards[CARDS_PER_USER:]
-        joker = cards[0]
-        cards = cards[1:]
-        discard_pile = [cards[0]]
-        cards = cards[1:]
+        while True:
+            cards = shuffled_deck(3)
+            hands = {}
+            for name in names:
+                hands[name] = cards[:CARDS_PER_USER]
+                cards = cards[CARDS_PER_USER:]
+            joker = cards[0]
+            if joker == ["$", "$"]:
+                continue
+            cards = cards[1:]
+            discard_pile = [cards[0]]
+            cards = cards[1:]
+            break
         return cls(
             names=names,
             joker=joker,

@@ -7,7 +7,8 @@ from ssg_rummy_server.sequences.pure import consistent_pure_sequences
 
 MIN_NUM_PURE_SEQUENCES = 3
 
-#TODO implement pairs game
+# TODO implement pairs game
+
 
 @attr.s
 class SequenceAnalysis:
@@ -27,6 +28,7 @@ class SequenceAnalysis:
     def sufficient_sequences(self):
         return len(self.pure_sequences) >= MIN_NUM_PURE_SEQUENCES
 
+
 def sequence_analyses(joker, cards):
     """
     Sequence analyses for a list of cards. Returns a list of SequenceAnalysis objects.
@@ -43,7 +45,8 @@ def sequence_analyses(joker, cards):
                 remaining_cards, len(jokers)
             ):
                 other = subtract_bags(
-                    remaining_cards, [x for xs in impure_sequences for x in xs if x != ()]
+                    remaining_cards,
+                    [x for xs in impure_sequences for x in xs if x != ()],
                 )
                 assert other is not None
                 yield SequenceAnalysis(pure_sequences, impure_sequences, jokers, other)

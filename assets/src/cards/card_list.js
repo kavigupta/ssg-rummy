@@ -82,6 +82,7 @@ export function CardList(props) {
                     overIndex
                 );
             });
+            props.set_which_is_selected(overIndex, true);
         }
 
         setActiveId(null);

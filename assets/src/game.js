@@ -61,22 +61,14 @@ function DrawButtons(props) {
 }
 
 function Throw(props) {
-    const [message, setMessage] = useState('');
-
-    const handleChange = event => {
-        setMessage(event.target.value);
-
-        console.log('value is:', event.target.value);
-    };
-
     function onThrow() {
-        const idx = parseInt(message);
+        const idx = props.which;
         send_command(client, { "type": "throw", "index": idx, "card": props.hand[idx] });
+        props.set_which_is_selected(null);
     }
 
     return (
         <div className="throw">
-            <input type="text" id="throw-input" onChange={handleChange} />
             <button onClick={() => onThrow()} disabled={!props.is_throw}>Throw</button>
         </div>
     );
@@ -92,7 +84,7 @@ class MainPanel extends React.Component {
             discarded: null,
             hand: [],
             state: null,
-            which_is_selected: 5,
+            which_is_selected: null,
         };
     }
 
@@ -122,7 +114,10 @@ class MainPanel extends React.Component {
                 />
                 <br />
                 <DrawButtons is_draw={this.is_turn("draw")} />
-                <Throw is_throw={this.is_turn("throw")} hand={this.state.hand} />
+                <Throw
+                    is_throw={this.is_turn("throw")}
+                    hand={this.state.hand} which={this.state.which_is_selected}
+                    set_which_is_selected={(idx, new_val) => this.set_which_is_selected(idx, new_val)}/>
             </div>
         );
     }

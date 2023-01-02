@@ -7,6 +7,7 @@ from ssg_rummy_server.sequences.pure import consistent_pure_sequences
 
 MIN_NUM_PURE_SEQUENCES = 3
 
+#TODO implement pairs game
 
 @attr.s
 class SequenceAnalysis:

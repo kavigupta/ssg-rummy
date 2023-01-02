@@ -15,3 +15,7 @@ def shuffled_deck(num_decks):
     assert len(whole_deck) == num_decks * 54, str((len(whole_deck)))
     random.shuffle(whole_deck)
     return whole_deck
+
+
+def to_number(card_number):
+    return numbers.index(card_number) + 1

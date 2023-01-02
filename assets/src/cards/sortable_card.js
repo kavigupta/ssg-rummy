@@ -4,7 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 import Card from "./card";
 
-const SortableCard = ({ id }) => {
+const SortableCard = ({ id, selected }) => {
     const {
         attributes,
         listeners,
@@ -27,7 +27,7 @@ const SortableCard = ({ id }) => {
             {...attributes}
             {...listeners}
         >
-            <Card id={id} />
+            <Card id={id} selected={selected}/>
         </li>
     );
 };

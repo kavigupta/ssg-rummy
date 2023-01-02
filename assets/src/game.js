@@ -5,7 +5,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import ReactDOM from 'react-dom/client';
 
 import { CardList } from './cards/card_list';
-import Card from './cards/card';
+import Card, { JustCard } from './cards/card';
 
 const client = new W3CWebSocket('ws://' + location.host + '/update_game_state');
 
@@ -38,7 +38,7 @@ function WhoseTurn(props) {
 function Joker(props) {
     return (
         <span className="joker">
-            <Card dragOverlay={false} id={JSON.stringify(["joker", props.joker])} />
+            <JustCard dragOverlay={false} id={JSON.stringify(["joker", props.joker])} />
         </span>
     );
 }
@@ -46,7 +46,7 @@ function Joker(props) {
 function Discarded(props) {
     return (
         <span className="discarded">
-            <Card dragOverlay={false} id={JSON.stringify(["discarded", props.discarded])} />
+            <JustCard dragOverlay={false} id={JSON.stringify(["discarded", props.discarded])} />
         </span>
     );
 }
@@ -92,8 +92,8 @@ class MainPanel extends React.Component {
             discarded: null,
             hand: [],
             state: null,
+            which_is_selected: 5,
         };
-
     }
 
     componentWillMount() {
@@ -114,12 +114,25 @@ class MainPanel extends React.Component {
                 <br />
                 Joker: <Joker joker={this.state.joker} />, Discard pile: <Discarded discarded={this.state.discarded} />
                 <br />
-                <CardList state={this.state.hand} setItems={fn => this.updateHand(fn)} />
+                <CardList
+                    state={this.state.hand}
+                    setItems={fn => this.updateHand(fn)}
+                    which_is_selected={this.state.which_is_selected}
+                    set_which_is_selected={(idx, new_val) => this.set_which_is_selected(idx, new_val)}
+                />
                 <br />
                 <DrawButtons is_draw={this.is_turn("draw")} />
                 <Throw is_throw={this.is_turn("throw")} hand={this.state.hand} />
             </div>
         );
+    }
+
+    set_which_is_selected(idx, new_val) {
+        if (new_val) {
+            this.setState({ which_is_selected: idx });
+        } else {
+            this.setState({ which_is_selected: null });
+        }
     }
 
     updateHand(fn) {

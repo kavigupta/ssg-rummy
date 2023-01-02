@@ -2,19 +2,31 @@ import React from "react";
 
 import "./card.css";
 
-const Card = ({ id, dragOverlay }) => {
+export const JustCard = ({ id, dragOverlay }) => {
+    return (
+        <Card id={id} dragOverlay={dragOverlay} selected={false} />
+    );
+};
+
+const Card = ({ id, dragOverlay, selected }) => {
     const style = {
         cursor: dragOverlay ? "grabbing" : "grab",
     };
 
     const [num, card] = JSON.parse(id);
+    var classes = ["card", card_color(card)];
+
+    if (selected) {
+        classes.push("card_selected");
+    }
 
     return (
-        <span id={num} style={style} className={["card", card_color(card)].join(' ')}>
+        <span id={num} style={style} className={classes.join(' ')}>
             {render_card(card)}
         </span>
     );
 };
+
 
 function card_color(card) {
     if (card === null) {

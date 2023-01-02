@@ -5,3 +5,7 @@
 .card_black {
     color: #000;
 }
+
+.card_selected {
+    background-color: #ff0;
+}

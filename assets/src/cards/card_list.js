@@ -21,14 +21,18 @@ import Card from "./card";
 import "./card_list.css";
 
 
-const DroppableCard = ({ id, items }) => {
+const DroppableCard = ({ id, items, which_is_selected, update_selected }) => {
     const { setNodeRef } = useDroppable({ id });
 
     return (
         <SortableContext id={id} items={items} strategy={rectSortingStrategy}>
             <ol className="cardlist" ref={setNodeRef}>
-                {items.map((item) => (
-                    <SortableCard key={item} id={item} />
+                {[...Array(items.length).keys()].map((i) => (
+                    <SortableCard
+                        key={items[i]}
+                        id={items[i]}
+                        selected={which_is_selected == i}
+                        update_selected={(new_selected) => update_selected(i, new_selected)} />
                 ))}
             </ol>
         </SortableContext>
@@ -41,6 +45,8 @@ export function CardList(props) {
 
     const [activeId, setActiveId] = useState(null);
 
+    const [activeIndexTopLevel, setActiveIndexTopLevel] = useState(null);
+
     const sensors = useSensors(
         useSensor(MouseSensor),
         useSensor(TouchSensor),
@@ -49,7 +55,11 @@ export function CardList(props) {
         })
     );
 
-    const handleDragStart = ({ active }) => setActiveId(active.id);
+    const handleDragStart = ({ active }) => {
+        setActiveId(active.id);
+        setActiveIndexTopLevel(active.data.current.sortable.index);
+        props.set_which_is_selected(active.data.current.sortable.index, true);
+    }
 
     const handleDragCancel = () => setActiveId(null);
 
@@ -91,9 +101,11 @@ export function CardList(props) {
                     items={its}
                     activeId={activeId}
                     key={"group1"}
+                    which_is_selected={props.which_is_selected}
+                    update_selected={props.set_which_is_selected}
                 />
             </div>
-            <DragOverlay>{activeId ? <Card id={activeId} dragOverlay /> : null}</DragOverlay>
+            <DragOverlay>{activeId ? <Card id={activeId} dragOverlay selected={activeIndexTopLevel == props.which_is_selected} /> : null}</DragOverlay>
         </DndContext>
     );
 }

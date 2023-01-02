@@ -33,10 +33,10 @@ function render_card(card) {
     }
     const number = card[0];
     var to_suit = {
-        H: "♠",
+        H: "♥",
         D: "♦",
         C: "♣",
-        S: "♥",
+        S: "♠",
         "$": "$",
     };
     const suit = to_suit[card[1]];
